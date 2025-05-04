@@ -23,7 +23,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.avito.ma/*"
+        "https://www.avito.ma/*/*/voitures_d'occasion/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
