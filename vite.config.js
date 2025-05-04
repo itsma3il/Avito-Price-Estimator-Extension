@@ -1,33 +1,38 @@
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve, dirname } from 'path';
+import { resolve,dirname } from 'path';
+
 import { fileURLToPath } from 'url';
-import { crx } from '@crxjs/vite-plugin';
-import manifest from './public/manifest.json';
-import tailwindcss from '@tailwindcss/vite';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [
-    react(),tailwindcss(),
-    crx({ 
-      manifest,
-      build: {
-        emptyOutDir: true,
-        rollupOptions: {
-          input: {
-            index: resolve(__dirname, 'index.html'),
-            content: resolve(__dirname, 'src/content.js'),
-            background: resolve(__dirname, 'src/background.js')
-          },
-          output: {
-            chunkFileNames: 'assets/[name]-[hash].js',
-            entryFileNames: 'src/[name].js',
-            assetFileNames: 'assets/[name]-[hash][extname]'
-          }
-        }
+  plugins: [react(),tailwindcss()],
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        // Main extension files
+        content: resolve(__dirname, 'src/content.js'),
+        background: resolve(__dirname, 'src/background.js'),
+        // Popup page
+        index: resolve(__dirname, 'index.html')
+      },
+      output: {
+        // No hashes for extension scripts
+        entryFileNames: '[name].js',
+        // Hashed assets
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        // Hashed chunks (if any)
+        chunkFileNames: 'assets/[name]-[hash].js'
       }
-    })
-  ]
+    }
+  },
+  css: {
+    // Extract CSS to assets folder
+    modules: false,
+    postcss: null
+  }
 });

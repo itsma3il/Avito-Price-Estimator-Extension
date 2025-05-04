@@ -14,24 +14,24 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
-    "https://avito.ma/*",
-    "https://api.your-car-estimator.com/*"
+    "https://www.avito.ma/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "https://avito.ma/*"
+        "https://www.avito.ma/*"
       ],
-      "js": [
-        "src/content.js"
-      ]
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
   "background": {
-    "service_worker": "src/background.js"
+    "service_worker":  "background.js",
+    "type": "module"
   },
   "icons": {
     "16": "icons/icon16.png",
@@ -44,7 +44,7 @@
         "assets/*"
       ],
       "matches": [
-        "https://avito.ma/*"
+        "https://www.avito.ma/*"
       ]
     }
   ]

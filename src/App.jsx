@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { estimateCarPrice } from './services/apiService';
-import ManualEstimateForm from './components/ManualEstimateForm';
-import EstimationResult from './components/EstimationResult';
-import LoadingSpinner from './components/LoadingSpinner';
-import { validateCarData } from './utils/validation';
+import { useState, useEffect } from "react";
+import { estimateCarPrice } from "./services/apiService";
+import ManualEstimateForm from "./components/ManualEstimateForm";
+import EstimationResult from "./components/EstimationResult";
+import LoadingSpinner from "./components/LoadingSpinner";
+import { validateCarData } from "./utils/validation";
 
 function App() {
-  const [activeTab, setActiveTab] = useState('manual');
+  const [activeTab, setActiveTab] = useState("manual");
   const [estimation, setEstimation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentUrl, setCurrentUrl] = useState('');
+  const [currentUrl, setCurrentUrl] = useState("");
 
   useEffect(() => {
     // Get current tab URL
@@ -24,18 +24,18 @@ function App() {
   const handleManualEstimate = async (formData) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const validationErrors = validateCarData(formData);
       if (validationErrors.length > 0) {
-        throw new Error(validationErrors.join('\n'));
+        throw new Error(validationErrors.join("\n"));
       }
 
       const result = await estimateCarPrice(formData);
       setEstimation(result);
     } catch (err) {
-      console.error('Estimation error:', err);
-      setError(err.message || 'Failed to estimate price');
+      console.error("Estimation error:", err);
+      setError(err.message || "Failed to estimate price");
     } finally {
       setIsLoading(false);
     }
@@ -46,32 +46,58 @@ function App() {
     setError(null);
 
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
-      if (!tab.url.includes('avito.ma') && !tab.url.includes("voitures_d'occasion")) {
-        throw new Error('Please navigate to a car listing on avito.ma');
-      }
-
-      const response = await chrome.tabs.sendMessage(tab.id, { 
-        action: "extractCarData" 
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
       });
-      console.log('Response from content script:', response);
+      if (!tab?.id) throw new Error("No active tab found");
 
-      if (response?.error) {
-        throw new Error(response.error);
+      try {
+        await chrome.tabs.sendMessage(tab.id, { action: "ping" });
+      } catch (error) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["content.js"],
+        });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await chrome.tabs.sendMessage(tab.id, { action: "ping" });
       }
 
-      const result = await estimateCarPrice(response.data);
-      setEstimation(result);
+      // Get car data
+      const { data, error: extractionError } = await chrome.tabs.sendMessage(
+        tab.id,
+        { action: "extractCarData" }
+      );
+      if (extractionError){
+        setError(extractionError);
+        return;
+      };
 
-      // Send result to content script for display
+      // Get estimation
+      const estimation = await chrome.runtime.sendMessage({
+        action: "estimateFromPage",
+        data,
+      });
+      if (estimation.error) {
+        setError(estimation.error);
+        return;
+      }
+
+      // Display results
+      setEstimation(estimation);
+      if(!estimation) {
+        setError("APP.jsx -> No estimation data found");
+        return;
+      }
+      
       await chrome.tabs.sendMessage(tab.id, {
         action: "displayEstimation",
-        estimation: result
+        estimation,
       });
-    } catch (err) {
-      console.error('Website estimation error:', err);
-      setError(err.message || 'Failed to estimate from website');
+      setEstimation(estimation);
+
+    } catch (error) {
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -91,21 +117,21 @@ function App() {
       <div className="flex border-b border-gray-200 mb-4">
         <button
           className={`flex-1 py-2 font-medium text-sm ${
-            activeTab === 'manual' 
-              ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
+            activeTab === "manual"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-700"
           }`}
-          onClick={() => setActiveTab('manual')}
+          onClick={() => setActiveTab("manual")}
         >
           Manual Estimate
         </button>
         <button
           className={`flex-1 py-2 font-medium text-sm ${
-            activeTab === 'website' 
-              ? 'text-blue-600 border-b-2 border-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
+            activeTab === "website"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-700"
           }`}
-          onClick={() => setActiveTab('website')}
+          onClick={() => setActiveTab("website")}
         >
           Website Estimate
         </button>
@@ -117,25 +143,25 @@ function App() {
         </div>
       ) : (
         <>
-          {activeTab === 'manual' ? (
-            <ManualEstimateForm 
-              onSubmit={handleManualEstimate} 
+          {activeTab === "manual" ? (
+            <ManualEstimateForm
+              onSubmit={handleManualEstimate}
               currentUrl={currentUrl}
             />
           ) : (
             <div className="space-y-4">
               <button
                 onClick={handleWebsiteEstimate}
-                disabled={!currentUrl.includes('avito.ma')}
+                disabled={!currentUrl.includes("avito.ma")}
                 className={`w-full py-2 px-4 rounded-md text-white font-medium ${
-                  currentUrl.includes('avito.ma')
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-gray-400 cursor-not-allowed'
+                  currentUrl.includes("avito.ma")
+                    ? "bg-blue-600 hover:bg-blue-700"
+                    : "bg-gray-400 cursor-not-allowed"
                 }`}
               >
                 Estimate Current Listing
               </button>
-              {!currentUrl.includes('avito.ma') && (
+              {!currentUrl.includes("avito.ma") && (
                 <p className="text-sm text-gray-500 text-center">
                   Navigate to an avito.ma car listing to use this feature
                 </p>
@@ -151,8 +177,8 @@ function App() {
 
           {estimation && (
             <div className="mt-4">
-              <EstimationResult 
-                estimation={estimation} 
+              <EstimationResult
+                estimation={estimation}
                 onClose={() => setEstimation(null)}
               />
             </div>
