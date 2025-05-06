@@ -102,13 +102,19 @@ function App() {
       setIsLoading(false);
     }
   };
-
+  const openStandalonePage = () => {
+    const url = chrome.runtime.getURL('src/standalone/index.html');
+    chrome.tabs.create({ url });
+  };
   return (
     <div className="w-[400px] min-h-[400px] bg-gray-50 p-4">
       <header className="mb-6">
         <h1 className="text-xl font-bold text-gray-800 text-center">
           Car Price Estimator
         </h1>
+        <button onClick={()=>openStandalonePage()}>
+          to standalone test
+        </button>
         <p className="text-xs text-gray-500 text-center mt-1">
           Get accurate market price estimates
         </p>

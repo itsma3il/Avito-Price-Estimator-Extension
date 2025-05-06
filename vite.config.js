@@ -15,10 +15,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         content: resolve(__dirname, 'src/content.js'),
-
         background: resolve(__dirname, 'src/background.js'),
         index: resolve(__dirname, 'index.html'),
-        standalone: resolve(__dirname, 'src/standalone/index.html')
+        standalone: resolve(__dirname, 'src/standalone/index.html'),
       },
       output: {
         entryFileNames: '[name].js',
