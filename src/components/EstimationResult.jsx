@@ -44,7 +44,7 @@ export default function EstimationResult({ estimation, onClose }) {
     );
   }
 
-  const listedPrice = parseInt(estimation.price) || 0;
+  const listedPrice = parseInt(estimation.listedPrice) || 0;
   const estimatedPrice = parseInt(estimation.estimatedPrice) || 0;
   const difference = listedPrice - estimatedPrice;
   const percentDiff = Math.round((difference / estimatedPrice) * 100);
