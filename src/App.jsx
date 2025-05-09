@@ -101,7 +101,7 @@ function App() {
   };
 
   return (
-    <div className="w-[380px] min-h-[500px] bg-gradient-to-b from-gray-50 to-gray-100 p-6 flex flex-col">
+    <div className="w-[400px] min-h-[500px] bg-gradient-to-b from-gray-50 to-gray-100 p-6 flex flex-col">
       <header className="mb-6">
         <div className="flex items-center justify-center space-x-2 mb-2">
           <TruckIcon className="h-6 w-6 text-blue-600" />
