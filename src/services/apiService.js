@@ -65,7 +65,7 @@ export function normalizeCarData(data) {
     premiere_main: premiere_main_value,
     Nombre_doors: parseInt(data.Nombre_doors) || 5,
     city: data.city?.toLowerCase() || 'unknown',
-    price: data.price ? parseInt(data.price.toString().replace(/\D/g, '')) : null,
+    price: data.price ? parseInt(data.price.toString().replace(/\D/g, '')) : 0,
     url: data.url || null
   };
 }
