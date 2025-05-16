@@ -3,6 +3,14 @@
 Car Price Estimator Pro is a browser extension designed to provide accurate market price estimates for cars listed on [avito.ma](https://www.avito.ma). This tool allows users to either manually input car details or automatically extract data from car listings to determine an estimated market value. It is built with React, TailwindCSS, and Vite, and leverages Chrome's extension APIs for seamless integration with the browser.
 
 ---
+## Related Repositories
+
+- **Machine Learning Model**:  
+   [Predict_Price_Car](https://github.com/eddaoudi-mohamed/Predict_Price_Car) – Contains the core machine learning model used for car price estimation.
+
+- **Backend API**:  
+   Repository coming soon.
+---
 
 ## Key Features
 
